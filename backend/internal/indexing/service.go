@@ -31,7 +31,7 @@ type service struct {
 	logger   log.Logger
 }
 
-func NewService(es *elasticsearch.Client, l log.Logger) *service {
+func NewService(es *elasticsearch.Client, l log.Logger) Service {
 	return &service{esClient: es, logger: l}
 }
 

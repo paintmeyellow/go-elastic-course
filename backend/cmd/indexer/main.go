@@ -32,8 +32,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	indexer := indexing.NewService(es, logger)
-	if err = indexer.ReIndex(context.Background(), *indexName); err != nil {
+	indexService := indexing.NewService(es, logger)
+	if err = indexService.ReIndex(context.Background(), *indexName); err != nil {
 		level.Error(logger).Log("error", err)
 		os.Exit(1)
 	}
