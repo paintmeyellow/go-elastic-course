@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
     elastic:
         container_name: elastic
@@ -35,6 +37,16 @@ services:
             - gomodules:/go/pkg/mod
             - ./backend:/go/pkg/app
         working_dir: /go/pkg/app
+
+    frontend:
+        container_name: frontend
+        build:
+            dockerfile: docker/Dockerfile
+            context: frontend
+        ports:
+            - 8080:8080
+        volumes:
+            - ./frontend:/app
 
 volumes:
     esdata:

@@ -2,7 +2,7 @@ up: docker-down docker-up
 down: docker-down
 
 docker-up:
-	docker-compose up -d elastic kibana
+	docker-compose up -d elastic kibana frontend
 docker-down:
 	docker-compose down --remove-orphans -v
 
