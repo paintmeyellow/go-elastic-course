@@ -3,12 +3,14 @@ import {createStore} from 'vuex'
 const store = createStore({
     state() {
         return {
-            carsList: [],
+            cars: [],
+            searched: false,
         }
     },
     mutations: {
-        updateCarsList(state, list) {
-            state.carsList = list
+        updateCars(state, cars) {
+            state.cars = cars
+            state.searched = true
         }
     }
 })

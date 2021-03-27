@@ -4,25 +4,18 @@
             <el-card class="box-card"
                      shadow="never"
                      :body-style="{ padding: '0px' }"
-                     :key="product.id"
-                     v-for="product in carsList"
+                     :key="car.id"
+                     v-for="car in cars"
             >
-                <img src="../assets/placeholder.png"
-                     class="image"
-                     alt="{{product.make}}"
-                >
+                <img src="../assets/placeholder.png" class="image" alt="{{car.make}}">
                 <div style="padding: 14px;">
-                    <span>{{ product.make }} {{ product.model }}</span>
-                    <div class="bottom">
-                        <p><strong>${{ product.params.price }}</strong></p>
-                    </div>
+                    <span>{{ car.make }} {{ car.model }}</span>
+                        <p><strong>${{ car.params.price }}</strong></p>
                 </div>
             </el-card>
         </el-space>
 
-        <el-empty v-if="isCarsListEmpty"
-                  description="Nothing Found – Sorry, but nothing matched your search criteria."
-        />
+        <el-empty v-if="isCarsEmpty" description="Nothing Found – Sorry, but nothing matched your search criteria."/>
     </el-row>
 </template>
 
@@ -33,10 +26,11 @@ export default {
     name: "CarsList",
     computed: {
         ...mapState({
-            carsList: state => state.carsList,
+            cars: state => state.cars,
+            searched: state => state.searched,
         }),
-        isCarsListEmpty() {
-            return this.carsList === null || this.carsList.length === 0
+        isCarsEmpty() {
+            return this.searched && (this.cars === null || this.cars.length === 0)
         }
     }
 }

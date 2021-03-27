@@ -34,16 +34,19 @@ export default {
             query: "",
         }
     },
+    mounted() {
+        this.search()
+    },
     methods: {
         search() {
             let loading = ElLoading.service({fullscreen: true})
             axios.post("http://localhost:8081/search/cars", JSON.stringify({query: this.query}))
                 .then(response => {
                     setTimeout(() => {
-                        store.commit("updateCarsList", response.data["cars"])
-                    }, 150)
+                        store.commit("updateCars", response.data["cars"])
+                        this.$nextTick(() => loading.close());
+                    }, 200)
                 })
-            this.$nextTick(() => loading.close());
         }
     },
     setup() {

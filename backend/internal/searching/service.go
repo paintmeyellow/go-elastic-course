@@ -24,14 +24,24 @@ func NewService(es *elasticsearch.Client, l log.Logger) Service {
 
 func (s service) Search(ctx context.Context, req Request) ([]Car, error) {
 	var buf bytes.Buffer
+
 	body := map[string]interface{}{
 		"query": map[string]interface{}{
-			"multi_match": map[string]interface{}{
-				"query":  req.Query,
-				"fields": []string{"make", "model"},
-			},
+			"match_all": map[string]interface{}{},
 		},
 	}
+
+	if req.Query != "" {
+		body = map[string]interface{}{
+			"query": map[string]interface{}{
+				"multi_match": map[string]interface{}{
+					"query":  req.Query,
+					"fields": []string{"make", "model"},
+				},
+			},
+		}
+	}
+
 	if err := json.NewEncoder(&buf).Encode(body); err != nil {
 		return nil, err
 	}
