@@ -7,7 +7,7 @@ docker-down:
 	docker-compose down --remove-orphans -v
 
 search-up:
-	docker-compose run  -d --rm -p 8081:80 golang go run cmd/searcher/main.go \
+	docker-compose run  --rm -p 8081:80 golang go run cmd/searcher/main.go \
 		 -hosts="http://elastic:9200" \
 		 -serverBindAddress=":80"
 

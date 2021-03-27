@@ -1,16 +1,14 @@
 package searching
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/go-kit/kit/log"
-	"github.com/pkg/errors"
+	"github.com/paintmeyellow/go-elastic-course/internal/elastic"
 )
 
 type Service interface {
-	Search(ctx context.Context, req Request) ([]Car, error)
+	Search(ctx context.Context, req Request) (*Response, error)
 }
 
 type service struct {
@@ -22,69 +20,18 @@ func NewService(es *elasticsearch.Client, l log.Logger) Service {
 	return &service{esClient: es, logger: l}
 }
 
-func (s service) Search(ctx context.Context, req Request) ([]Car, error) {
-	var buf bytes.Buffer
-
-	body := map[string]interface{}{
-		"query": map[string]interface{}{
-			"match_all": map[string]interface{}{},
-		},
+func (s service) Search(ctx context.Context, req Request) (*Response, error) {
+	esReq := &elastic.SearchRequest{
+		Index: req.Index,
+		Query: req.Query,
 	}
-
-	if req.Query != "" {
-		body = map[string]interface{}{
-			"query": map[string]interface{}{
-				"multi_match": map[string]interface{}{
-					"query":  req.Query,
-					"fields": []string{"make", "model"},
-				},
-			},
-		}
-	}
-
-	if err := json.NewEncoder(&buf).Encode(body); err != nil {
-		return nil, err
-	}
-
-	esResp, err := s.esClient.Search(
-		s.esClient.Search.WithIndex(req.Index),
-		s.esClient.Search.WithBody(&buf),
-		s.esClient.Search.WithContext(ctx),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	defer esResp.Body.Close()
-
-	if esResp.IsError() {
-		var errRes struct {
-			Error struct {
-				Type   string `json:"type"`
-				Reason string `json:"reason"`
-			} `json:"error"`
-		}
-
-		if err = json.NewDecoder(esResp.Body).Decode(&errRes); err != nil {
-			return nil, err
-		}
-
-		return nil, errors.Errorf(" - [%s] %s: %s",
-			esResp.Status(),
-			errRes.Error.Type,
-			errRes.Error.Reason,
-		)
-	}
-
-	var resp Response
-
-	err = json.NewDecoder(esResp.Body).Decode(&resp)
+	esResp, err := esReq.Do(ctx, s.esClient)
 	if err != nil {
 		return nil, err
 	}
 
 	var cars []Car
-	for _, hit := range resp.Hits.Hits {
+	for _, hit := range esResp.Hits.Hits {
 		cars = append(cars, Car{
 			ID:    hit.Source.ID,
 			Make:  hit.Source.Make,
@@ -97,5 +44,8 @@ func (s service) Search(ctx context.Context, req Request) ([]Car, error) {
 		})
 	}
 
-	return cars, nil
+	return &Response{
+		Cars:    cars,
+		Filters: esResp.Filters(),
+	}, nil
 }

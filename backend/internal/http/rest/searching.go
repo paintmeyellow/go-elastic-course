@@ -14,7 +14,8 @@ type searchRequest struct {
 	Query string `json:"query"`
 }
 type searchResponse struct {
-	Cars []searching.Car `json:"cars"`
+	Cars    []searching.Car          `json:"cars"`
+	Filters []map[string]interface{} `json:"filters"`
 }
 
 func DecodeSearchHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -35,7 +36,7 @@ func MakeSearchEndpoint(svc searching.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(searchRequest)
 
-		cars, err := svc.Search(context.Background(), searching.Request{
+		resp, err := svc.Search(context.Background(), searching.Request{
 			Index: req.index,
 			Query: req.Query,
 		})
@@ -43,6 +44,9 @@ func MakeSearchEndpoint(svc searching.Service) endpoint.Endpoint {
 			return searchResponse{}, err
 		}
 
-		return searchResponse{Cars: cars}, nil
+		return searchResponse{
+			Cars:    resp.Cars,
+			Filters: resp.Filters,
+		}, nil
 	}
 }
