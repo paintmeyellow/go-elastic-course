@@ -48,7 +48,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(accessControl)
-	router.Handle("/search/{index}", searchHandler).Methods(http.MethodGet)
+	router.Handle("/search/{index}", searchHandler).Methods(http.MethodPost)
 
 	chanErrors := make(chan error, 2)
 

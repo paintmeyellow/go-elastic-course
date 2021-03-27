@@ -37,13 +37,13 @@ export default {
     methods: {
         search() {
             let loading = ElLoading.service({fullscreen: true})
-            axios.get("http://localhost:8081/search/cars", {params: {query: this.query}})
+            axios.post("http://localhost:8081/search/cars", JSON.stringify({query: this.query}))
                 .then(response => {
                     setTimeout(() => {
                         store.commit("updateCarsList", response.data["cars"])
-                        this.$nextTick(() => loading.close());
                     }, 150)
                 })
+            this.$nextTick(() => loading.close());
         }
     },
     setup() {

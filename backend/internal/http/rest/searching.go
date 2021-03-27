@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
 	"github.com/paintmeyellow/go-elastic-course/internal/searching"
@@ -9,7 +10,7 @@ import (
 )
 
 type searchRequest struct {
-	Index string `json:"index"`
+	index string
 	Query string `json:"query"`
 }
 type searchResponse struct {
@@ -20,9 +21,12 @@ func DecodeSearchHTTPRequest(_ context.Context, r *http.Request) (interface{}, e
 	var req searchRequest
 
 	vars := mux.Vars(r)
-	req.Index = vars["index"]
+	req.index = vars["index"]
 
-	req.Query = r.URL.Query().Get("query")
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -32,7 +36,7 @@ func MakeSearchEndpoint(svc searching.Service) endpoint.Endpoint {
 		req := request.(searchRequest)
 
 		cars, err := svc.Search(context.Background(), searching.Request{
-			Index: req.Index,
+			Index: req.index,
 			Query: req.Query,
 		})
 		if err != nil {
