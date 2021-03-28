@@ -43,7 +43,9 @@ export default {
             axios.post("http://localhost:8081/search/cars", JSON.stringify({query: this.query}))
                 .then(response => {
                     setTimeout(() => {
+                        console.log(response.data)
                         store.commit("updateCars", response.data["cars"])
+                        store.commit("updateFilters", response.data["filters"])
                         this.$nextTick(() => loading.close());
                     }, 200)
                 })

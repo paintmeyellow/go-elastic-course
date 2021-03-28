@@ -15,7 +15,7 @@ type searchRequest struct {
 }
 type searchResponse struct {
 	Cars    []searching.Car          `json:"cars"`
-	Filters []map[string]interface{} `json:"filters"`
+	Filters map[string]interface{} `json:"filters"`
 }
 
 func DecodeSearchHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {

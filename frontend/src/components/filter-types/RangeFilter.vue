@@ -6,13 +6,26 @@
             </div>
         </template>
         <el-slider
-            v-model="value"
-            range
+            v-model="values"
             :min="min"
             :max="max"
-            :marks="marks"
+            range
         >
         </el-slider>
+        <div class="ranges">
+            <el-input-number @change="changeMinValue"
+                             :model-value="values[0]"
+                             size="mini"
+                             :min="min"
+                             controls-position="right"
+            />
+            <el-input-number @change="changeMaxValue"
+                             :model-value="values[1]"
+                             size="mini"
+                             :max="max"
+                             controls-position="right"
+            />
+        </div>
     </el-card>
 </template>
 
@@ -26,19 +39,36 @@ export default {
     },
     data() {
         return {
-            value: [0, 569],
-            marks: {
-                0: '0',
-                1000: "1000"
-            },
+            values: [this.min, this.max]
+        }
+    },
+    methods: {
+        changeValues(vv) {
+            this.values = vv
+        },
+        changeMinValue(v) {
+            this.values = [v, this.values[1]]
+        },
+        changeMaxValue(v) {
+            this.values = [this.values[0], v]
         }
     }
-
 }
 </script>
 
 <style scoped>
 .box-card {
     margin-bottom: 15px;
+}
+
+.ranges {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.el-input-number {
+    margin-top: 10px;
+    max-width: 110px;
 }
 </style>

@@ -4,6 +4,7 @@ const store = createStore({
     state() {
         return {
             cars: [],
+            filters: [],
             searched: false,
         }
     },
@@ -11,6 +12,9 @@ const store = createStore({
         updateCars(state, cars) {
             state.cars = cars
             state.searched = true
+        },
+        updateFilters(state, filters) {
+            state.filters = filters
         }
     }
 })

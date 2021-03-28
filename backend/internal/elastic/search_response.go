@@ -13,29 +13,29 @@ type SearchResponse struct {
 	} `json:"aggregations"`
 }
 
-func (req SearchResponse) Filters() []map[string]interface{} {
-	return []map[string]interface{}{
-		rangeFilter{
-			Name: "Price",
-			Min:  req.Aggs.MinPrice.Value(),
-			Max:  req.Aggs.MaxPrice.Value(),
-		}.build(),
+func (req SearchResponse) Filters() map[string]interface{} {
+	filters := make(map[string]interface{})
+
+	if req.Aggs.MinPrice.Value() != req.Aggs.MaxPrice.Value() {
+		filters["Price"] = rangeFilter{
+			Min: req.Aggs.MinPrice.Value(),
+			Max: req.Aggs.MaxPrice.Value(),
+		}.build()
 	}
+
+	return filters
 }
 
 type rangeFilter struct {
-	Name string
-	Min  float64
-	Max  float64
+	Min float64
+	Max float64
 }
 
 func (f rangeFilter) build() map[string]interface{} {
 	return map[string]interface{}{
-		f.Name: map[string]interface{}{
-			"type": "range",
-			"min":  f.Min,
-			"max":  f.Max,
-		},
+		"type": "range",
+		"min":  f.Min,
+		"max":  f.Max,
 	}
 }
 
