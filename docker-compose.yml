@@ -30,13 +30,25 @@ services:
             ELASTICSEARCH_URL: http://elastic:9200
             ELASTICSEARCH_HOSTS: http://elastic:9200
 
-    golang:
-        container_name: golang
-        image: golang:1.16
+    indexer:
+        container_name: indexer
+        build:
+            dockerfile: docker/indexer/Dockerfile
+            context: backend
         volumes:
             - gomodules:/go/pkg/mod
             - ./backend:/go/pkg/app
-        working_dir: /go/pkg/app
+
+    search:
+        container_name: search
+        build:
+            dockerfile: docker/search/Dockerfile
+            context: backend
+        ports:
+            - 8081:80
+        volumes:
+            - gomodules:/go/pkg/mod
+            - ./backend:/go/pkg/app
 
     frontend:
         container_name: frontend

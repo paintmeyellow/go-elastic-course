@@ -15,7 +15,7 @@ func main() {
 	fs := flag.NewFlagSet("Indexer", flag.ExitOnError)
 	var (
 		hosts     = fs.String("hosts", "http://0.0.0.0:9200", "Elasticsearch hosts")
-		indexName = fs.String("indexName", "cars", "Elasticsearch indexName name")
+		indexName = fs.String("indexName", "cars", "Elasticsearch index  123 name")
 	)
 	_ = fs.Parse(os.Args[1:])
 

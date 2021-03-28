@@ -1,21 +1,24 @@
 <template>
     <el-row id="cars-list">
-        <el-space wrap :size="10" style="justify-content: flex-start">
-            <el-card class="box-card"
-                     shadow="never"
-                     :body-style="{ padding: '0px' }"
-                     :key="car.id"
-                     v-for="car in cars"
-            >
-                <img src="../assets/placeholder.png" class="image" alt="{{car.make}}">
-                <div style="padding: 14px;">
-                    <span>{{ car.make }} {{ car.model }}</span>
+        <el-col>
+            <el-space wrap :size="10" style="justify-content: flex-start">
+                <el-card class="box-card"
+                         shadow="never"
+                         :body-style="{ padding: '0px' }"
+                         :key="car.id"
+                         v-for="car in cars"
+                >
+                    <img src="../assets/placeholder.png" class="image" alt="{{car.make}}">
+                    <div style="padding: 14px;">
+                        <span>{{ car.make }} {{ car.model }}</span>
                         <p><strong>${{ car.params.price }}</strong></p>
-                </div>
-            </el-card>
-        </el-space>
+                    </div>
+                </el-card>
+            </el-space>
 
-        <el-empty v-if="isCarsEmpty" description="Nothing Found – Sorry, but nothing matched your search criteria."/>
+            <el-empty v-if="isCarsEmpty"
+                      description="Nothing Found – Sorry, but nothing matched your search criteria."/>
+        </el-col>
     </el-row>
 </template>
 
