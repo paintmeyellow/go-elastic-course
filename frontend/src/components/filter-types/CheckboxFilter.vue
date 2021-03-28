@@ -2,14 +2,18 @@
     <el-card class="box-card" shadow="false">
         <template #header>
             <div class="card-header">
-                <span>Color</span>
+                <span>{{ name }}</span>
             </div>
         </template>
         <el-checkbox-group v-model="checkList">
             <el-space direction="vertical" alignment="left">
-                <el-checkbox label="Red">Red<span class="badge">131</span></el-checkbox>
-                <el-checkbox label="Green">Green<span class="badge">52</span></el-checkbox>
-                <el-checkbox label="Blue">Blue<span class="badge">8</span></el-checkbox>
+                <el-checkbox
+                    :key="variant"
+                    v-for="variant in variants"
+                    :label="variant.value">
+                    {{ variant.value }}
+                    <span class="badge">{{variant.count}}</span>
+                </el-checkbox>
             </el-space>
         </el-checkbox-group>
     </el-card>
@@ -18,6 +22,10 @@
 <script>
 export default {
     name: "CheckboxFilter",
+    props: {
+        name: String,
+        variants: Array
+    },
     data() {
         return {
             checkList: ['Option A'],

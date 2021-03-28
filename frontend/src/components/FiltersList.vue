@@ -1,14 +1,10 @@
 <template>
-    <div>
 
-        <template :key="filter" v-for="(filter, name) in filters">
-            <range-filter v-if="isRange(filter)" :name="name" :min="filter.min" :max="filter.max"/>
-        </template>
+    <template :key="filter" v-for="(filter, name) in filters">
+        <range-filter v-if="isRange(filter)" :name="name" :min="filter.min" :max="filter.max"/>
+        <checkbox-filter v-if="isCheckbox(filter)" :name="name" :variants="filter.variants"/>
+    </template>
 
-        <checkbox-filter name="Color"/>
-        <checkbox-filter name="Year"/>
-
-    </div>
 </template>
 
 <script>
@@ -30,6 +26,9 @@ export default {
     methods: {
         isRange(filter) {
             return filter.type === "range"
+        },
+        isCheckbox(filter) {
+            return filter.type === "checkbox"
         }
     }
 }

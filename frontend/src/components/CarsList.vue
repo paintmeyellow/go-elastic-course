@@ -1,23 +1,20 @@
 <template>
-    <el-row id="cars-list">
-        <el-col>
-            <el-space wrap :size="10" style="justify-content: flex-start">
-                <el-card class="box-card"
-                         shadow="never"
-                         :body-style="{ padding: '0px' }"
-                         :key="car.id"
-                         v-for="car in cars"
-                >
-                    <img src="../assets/placeholder.png" class="image" alt="{{car.make}}">
-                    <div style="padding: 14px;">
-                        <span>{{ car.make }} {{ car.model }}</span>
-                        <p><strong>${{ car.params.price }}</strong></p>
-                    </div>
-                </el-card>
-            </el-space>
+    <el-row>
+        <el-col id="cars-list" v-if="!isCarsEmpty">
 
-            <el-empty v-if="isCarsEmpty"
-                      description="Nothing Found – Sorry, but nothing matched your search criteria."/>
+            <div class="card" :key="car.id" v-for="car in cars">
+                <img src="../assets/placeholder.png" class="image" alt="{{car.make}}">
+                <div class="detail title">
+                    {{ car.make }} {{ car.model }} {{ car.params.color }} {{ car.params.year }}
+                </div>
+                <div class="detail price">
+                    ${{ formatPrice(car.params.price) }}
+                </div>
+            </div>
+        </el-col>
+
+        <el-col id="cars-empty" v-if="isCarsEmpty">
+            <el-empty description="Nothing Found – Sorry, but nothing matched your search criteria."/>
         </el-col>
     </el-row>
 </template>
@@ -34,6 +31,11 @@ export default {
         }),
         isCarsEmpty() {
             return this.searched && (this.cars === null || this.cars.length === 0)
+        },
+    },
+    methods: {
+        formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR').format(price)
         }
     }
 }
@@ -41,16 +43,48 @@ export default {
 
 <style scoped>
 #cars-list {
-    display: flex;
-    justify-content: center;
     margin-top: 15px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-wrap: wrap;
 }
 
-.box-card img {
+#cars-empty {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.card img {
     max-width: 280px;
 }
 
-.box-card {
+.card {
+    padding: 0;
+    margin: 0 10px 10px 0;
     width: 280px;
+    border-radius: 4px;
+    border: 1px solid #EBEEF5;
+    background-color: #FFF;
+    overflow: hidden;
+    color: #303133;
+    -webkit-transition: .3s;
+    transition: .3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card .detail {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card .detail.price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #3e3e3e;
 }
 </style>
