@@ -92,7 +92,7 @@ func (req SearchRequest) aggs() map[string]interface{} {
 				},
 			},
 			"aggs": map[string]interface{}{
-				"price": map[string]interface{}{
+				"val": map[string]interface{}{
 					"min": map[string]interface{}{
 						"field": "params.price",
 					},
@@ -106,9 +106,37 @@ func (req SearchRequest) aggs() map[string]interface{} {
 				},
 			},
 			"aggs": map[string]interface{}{
-				"price": map[string]interface{}{
+				"val": map[string]interface{}{
 					"max": map[string]interface{}{
 						"field": "params.price",
+					},
+				},
+			},
+		},
+		"color": map[string]interface{}{
+			"filter": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"filter": activeFilters,
+				},
+			},
+			"aggs": map[string]interface{}{
+				"vars": map[string]interface{}{
+					"terms": map[string]interface{}{
+						"field": "params.color",
+					},
+				},
+			},
+		},
+		"year": map[string]interface{}{
+			"filter": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"filter": activeFilters,
+				},
+			},
+			"aggs": map[string]interface{}{
+				"vars": map[string]interface{}{
+					"terms": map[string]interface{}{
+						"field": "params.year",
 					},
 				},
 			},
