@@ -5,13 +5,13 @@ type SearchResponse struct {
 		Hits []struct {
 			Score  float64 `json:"_score"`
 			Source struct {
-				ID     int    `json:"id"`
-				Make   string `json:"make"`
-				Model  string `json:"model"`
+				ID     int     `json:"id"`
+				Make   string  `json:"make"`
+				Model  string  `json:"model"`
+				Price  float64 `json:"price"`
 				Params struct {
-					Color string  `json:"color"`
-					Year  uint16  `json:"year"`
-					Price float64 `json:"price"`
+					Color string `json:"color"`
+					Year  uint16 `json:"year"`
 				} `json:"params"`
 			} `json:"_source"`
 		} `json:"hits"`
@@ -24,9 +24,34 @@ type SearchResponse struct {
 	} `json:"aggregations"`
 }
 
-func (req SearchResponse) Filters() map[string]interface{} {
+/****************
+**** Filters ****
+*****************/
+
+type Filters struct {
+	Checkbox []checkboxFilter `json:"checkbox"`
+	Range    []rangeFilter    `json:"range"`
+}
+
+type checkboxFilter struct {
+	Name  string               `json:"name"`
+	Items []checkboxFilterItem `json:"items"`
+}
+
+type checkboxFilterItem struct {
+	Value string `json:"value"`
+	Count uint   `json:"count"`
+}
+
+type rangeFilter struct {
+	Name string  `json:"name"`
+	Min  float64 `json:"min"`
+	Max  float64 `json:"max"`
+}
+
+func (req SearchResponse) Filters() Filters {
 	var (
-		filters  = map[string]interface{}{}
+		filters  Filters
 		minPrice = req.Aggs.MinPrice
 		maxPrice = req.Aggs.MaxPrice
 		color    = req.Aggs.Color
@@ -34,67 +59,28 @@ func (req SearchResponse) Filters() map[string]interface{} {
 	)
 
 	if minPrice.Value() != maxPrice.Value() {
-		filters["Price"] = rangeFilter{
-			Min: minPrice.Value(),
-			Max: maxPrice.Value(),
-		}.build()
-	}
-
-	if !color.isEmpty() {
-		filters["Color"] = checkboxFilter{
-			Variants: color.variants(),
-		}.build()
-	}
-
-	if !year.isEmpty() {
-		filters["Year"] = checkboxFilter{
-			Variants: year.variants(),
-		}.build()
-	}
-
-	return filters
-}
-
-/****************
-**** Filters ****
-*****************/
-
-type checkboxFilter struct {
-	Variants []checkboxFilterVariant
-}
-
-type checkboxFilterVariant struct {
-	Value interface{}
-	Count uint
-}
-
-func (f checkboxFilter) build() map[string]interface{} {
-	vv := make([]map[string]interface{}, 0)
-
-	for _, v := range f.Variants {
-		vv = append(vv, map[string]interface{}{
-			"value": v.Value,
-			"count": v.Count,
+		filters.Range = append(filters.Range, rangeFilter{
+			Name: "Price",
+			Min:  minPrice.Value(),
+			Max:  maxPrice.Value(),
 		})
 	}
 
-	return map[string]interface{}{
-		"type":     "checkbox",
-		"variants": vv,
+	if !color.isEmpty() {
+		filters.Checkbox = append(filters.Checkbox, checkboxFilter{
+			Name:  "Color",
+			Items: color.checkboxFilterItems(),
+		})
 	}
-}
 
-type rangeFilter struct {
-	Min float64
-	Max float64
-}
-
-func (f rangeFilter) build() map[string]interface{} {
-	return map[string]interface{}{
-		"type": "range",
-		"min":  f.Min,
-		"max":  f.Max,
+	if !year.isEmpty() {
+		filters.Checkbox = append(filters.Checkbox, checkboxFilter{
+			Name:  "Year",
+			Items: year.checkboxFilterItems(),
+		})
 	}
+
+	return filters
 }
 
 /*********************
@@ -120,15 +106,15 @@ type termsAggregation struct {
 	} `json:"vars"`
 }
 
-func (agg termsAggregation) variants() []checkboxFilterVariant {
-	var vv []checkboxFilterVariant
+func (agg termsAggregation) checkboxFilterItems() []checkboxFilterItem {
+	var items []checkboxFilterItem
 	for _, b := range agg.Vars.Buckets {
-		vv = append(vv, checkboxFilterVariant{
+		items = append(items, checkboxFilterItem{
 			Value: b.Key,
 			Count: b.DocCount,
 		})
 	}
-	return vv
+	return items
 }
 
 func (agg termsAggregation) isEmpty() bool {

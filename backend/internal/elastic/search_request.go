@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/pkg/errors"
 )
 
 type SearchRequest struct {
-	Index string
-	Query string
+	Index         string
+	Query         string
+	ActiveFilters ActiveFilters
 }
 
 func (req SearchRequest) Do(ctx context.Context, es *elasticsearch.Client) (*SearchResponse, error) {
@@ -18,6 +20,9 @@ func (req SearchRequest) Do(ctx context.Context, es *elasticsearch.Client) (*Sea
 		"query": req.query(),
 		"aggs":  req.aggs(),
 	}
+
+	b, _ := json.Marshal(body)
+	fmt.Println(string(b))
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(body); err != nil {
@@ -81,20 +86,58 @@ func (req SearchRequest) query() map[string]interface{} {
 	return query
 }
 
-func (req SearchRequest) aggs() map[string]interface{} {
-	var activeFilters []map[string]interface{}
+type ActiveFilters struct {
+	Checkbox map[string][]string
+	Range    map[string]struct {
+		Min float64 `json:"min"`
+		Max float64 `json:"max"`
+	}
+}
 
+var nameToField = map[string]string{
+	"Price": "price",
+	"Color": "params.color",
+	"Year":  "params.year",
+}
+
+func (ff ActiveFilters) buildFor(skipField string) []map[string]interface{} {
+	var filters []map[string]interface{}
+	for name, values := range ff.Checkbox {
+		if field, ok := nameToField[name]; ok && field != skipField {
+			filters = append(filters, map[string]interface{}{
+				"terms": map[string]interface{}{
+					field: values,
+				},
+			})
+		}
+	}
+	for name, values := range ff.Range {
+		if field, ok := nameToField[name]; ok && field != skipField {
+			filters = append(filters, map[string]interface{}{
+				"range": map[string]interface{}{
+					field: map[string]float64{
+						"gte": values.Min,
+						"lte": values.Max,
+					},
+				},
+			})
+		}
+	}
+	return filters
+}
+
+func (req SearchRequest) aggs() map[string]interface{} {
 	return map[string]interface{}{
 		"min_price": map[string]interface{}{
 			"filter": map[string]interface{}{
 				"bool": map[string]interface{}{
-					"filter": activeFilters,
+					"filter": req.ActiveFilters.buildFor("price"),
 				},
 			},
 			"aggs": map[string]interface{}{
 				"val": map[string]interface{}{
 					"min": map[string]interface{}{
-						"field": "params.price",
+						"field": "price",
 					},
 				},
 			},
@@ -102,13 +145,13 @@ func (req SearchRequest) aggs() map[string]interface{} {
 		"max_price": map[string]interface{}{
 			"filter": map[string]interface{}{
 				"bool": map[string]interface{}{
-					"filter": activeFilters,
+					"filter": req.ActiveFilters.buildFor("price"),
 				},
 			},
 			"aggs": map[string]interface{}{
 				"val": map[string]interface{}{
 					"max": map[string]interface{}{
-						"field": "params.price",
+						"field": "price",
 					},
 				},
 			},
@@ -116,7 +159,7 @@ func (req SearchRequest) aggs() map[string]interface{} {
 		"color": map[string]interface{}{
 			"filter": map[string]interface{}{
 				"bool": map[string]interface{}{
-					"filter": activeFilters,
+					"filter": req.ActiveFilters.buildFor("params.color"),
 				},
 			},
 			"aggs": map[string]interface{}{
@@ -130,7 +173,7 @@ func (req SearchRequest) aggs() map[string]interface{} {
 		"year": map[string]interface{}{
 			"filter": map[string]interface{}{
 				"bool": map[string]interface{}{
-					"filter": activeFilters,
+					"filter": req.ActiveFilters.buildFor("params.year"),
 				},
 			},
 			"aggs": map[string]interface{}{

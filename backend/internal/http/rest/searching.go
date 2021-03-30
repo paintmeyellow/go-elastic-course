@@ -10,12 +10,20 @@ import (
 )
 
 type searchRequest struct {
-	index string
-	Query string `json:"query"`
+	index         string
+	Query         string `json:"query"`
+	ActiveFilters struct {
+		Checkbox map[string][]string `json:"checkbox"`
+		Range    map[string]struct {
+			Min float64 `json:"min"`
+			Max float64 `json:"max"`
+		} `json:"range"`
+	} `json:"active_filters"`
 }
+
 type searchResponse struct {
-	Cars    []searching.Car          `json:"cars"`
-	Filters map[string]interface{} `json:"filters"`
+	Cars    []searching.Car   `json:"cars"`
+	Filters searching.Filters `json:"filters"`
 }
 
 func DecodeSearchHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -39,6 +47,10 @@ func MakeSearchEndpoint(svc searching.Service) endpoint.Endpoint {
 		resp, err := svc.Search(context.Background(), searching.Request{
 			Index: req.index,
 			Query: req.Query,
+			ActiveFilters: searching.ActiveFilters{
+				Checkbox: req.ActiveFilters.Checkbox,
+				Range:    req.ActiveFilters.Range,
+			},
 		})
 		if err != nil {
 			return searchResponse{}, err

@@ -24,6 +24,10 @@ func (s service) Search(ctx context.Context, req Request) (*Response, error) {
 	esReq := &elastic.SearchRequest{
 		Index: req.Index,
 		Query: req.Query,
+		ActiveFilters: elastic.ActiveFilters{
+			Checkbox: req.ActiveFilters.Checkbox,
+			Range:    req.ActiveFilters.Range,
+		},
 	}
 	esResp, err := esReq.Do(ctx, s.esClient)
 	if err != nil {
@@ -36,16 +40,21 @@ func (s service) Search(ctx context.Context, req Request) (*Response, error) {
 			ID:    hit.Source.ID,
 			Make:  hit.Source.Make,
 			Model: hit.Source.Model,
+			Price: hit.Source.Price,
 			Params: Params{
 				Color: hit.Source.Params.Color,
 				Year:  hit.Source.Params.Year,
-				Price: hit.Source.Params.Price,
 			},
 		})
 	}
 
+	filters := esResp.Filters()
+
 	return &Response{
-		Cars:    cars,
-		Filters: esResp.Filters(),
+		Cars: cars,
+		Filters: Filters{
+			Checkbox: filters.Checkbox,
+			Range:    filters.Range,
+		},
 	}, nil
 }

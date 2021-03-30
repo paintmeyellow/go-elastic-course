@@ -8,11 +8,12 @@
         <el-checkbox-group v-model="checkList">
             <el-space direction="vertical" alignment="left">
                 <el-checkbox
-                    :key="variant"
-                    v-for="variant in variants"
-                    :label="variant.value">
-                    {{ variant.value }}
-                    <span class="badge">{{variant.count}}</span>
+                    :key="item"
+                    v-for="item in items"
+                    @change="onChange"
+                    :label="item.value">
+                    {{ item.value }}
+                    <span class="badge">{{item.count}}</span>
                 </el-checkbox>
             </el-space>
         </el-checkbox-group>
@@ -24,11 +25,16 @@ export default {
     name: "CheckboxFilter",
     props: {
         name: String,
-        variants: Array
+        items: Array
     },
     data() {
         return {
-            checkList: ['Option A'],
+            checkList: [],
+        }
+    },
+    methods: {
+        onChange(){
+            console.log(this.checkList)
         }
     }
 }

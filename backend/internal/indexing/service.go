@@ -48,11 +48,11 @@ func (s service) ReIndex(ctx context.Context, indexName string) error {
 			"properties": {
 				"make": { "type": "text" },
 				"model": { "type": "text" },
+				"price": { "type": "scaled_float", "scaling_factor": 100 },
 				"params": {
 					"properties": {
 						"color": { "type": "keyword" },
-						"year": { "type": "keyword" },
-						"price": { "type": "scaled_float", "scaling_factor": 100 }
+						"year": { "type": "keyword" }
 					}
 				}
 			}

@@ -1,9 +1,15 @@
 <template>
 
-    <template :key="filter" v-for="(filter, name) in filters">
-        <range-filter v-if="isRange(filter)" :name="name" :min="filter.min" :max="filter.max"/>
-        <checkbox-filter v-if="isCheckbox(filter)" :name="name" :variants="filter.variants"/>
-    </template>
+    <range-filter :key="filter"
+                  v-for="filter in filters.range"
+                  :name="filter.name"
+                  :min="filter.min"
+                  :max="filter.max"/>
+
+    <checkbox-filter :key="filter"
+                     v-for="filter in filters.checkbox"
+                     :name="filter.name"
+                     :items="filter.items"/>
 
 </template>
 
@@ -22,14 +28,6 @@ export default {
         ...mapState({
             filters: state => state.filters,
         }),
-    },
-    methods: {
-        isRange(filter) {
-            return filter.type === "range"
-        },
-        isCheckbox(filter) {
-            return filter.type === "checkbox"
-        }
     }
 }
 </script>

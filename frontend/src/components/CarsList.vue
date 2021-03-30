@@ -8,7 +8,7 @@
                     {{ car.make }} {{ car.model }} {{ car.params.color }} {{ car.params.year }}
                 </div>
                 <div class="detail price">
-                    ${{ formatPrice(car.params.price) }}
+                    ${{ formatPrice(car.price) }}
                 </div>
             </div>
         </el-col>

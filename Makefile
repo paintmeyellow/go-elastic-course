@@ -1,10 +1,15 @@
-init: docker-down docker-build docker-up index-data
+DEFAULT_GOAL: restart
+
+init: docker-down-clear docker-build docker-up index-data
 up: docker-down docker-up
 down: docker-down
+restart: down up
 
 docker-up:
 	docker-compose up -d
 docker-down:
+	docker-compose down --remove-orphans
+docker-down-clear:
 	docker-compose down --remove-orphans -v
 docker-build:
 	docker-compose build

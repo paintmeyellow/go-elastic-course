@@ -4,7 +4,10 @@ const store = createStore({
     state() {
         return {
             cars: [],
-            filters: [],
+            filters: {
+                "range": [],
+                "checkbox": []
+            },
             searched: false,
         }
     },
