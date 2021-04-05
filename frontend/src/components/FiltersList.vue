@@ -1,15 +1,18 @@
 <template>
 
-    <range-filter :key="filter"
-                  v-for="filter in filters.range"
-                  :name="filter.name"
-                  :min="filter.min"
-                  :max="filter.max"/>
+    <range-filter
+        @onChange="applyRangeFilter(filter.name, $event)"
+        :key="filter"
+        v-for="filter in filters.range"
+        :name="filter.name"
+        :min="filter.min"
+        :max="filter.max"/>
 
-    <checkbox-filter :key="filter"
-                     v-for="filter in filters.checkbox"
-                     :name="filter.name"
-                     :items="filter.items"/>
+    <checkbox-filter
+        :key="checkboxFilter"
+        v-for="checkboxFilter in filters.checkbox"
+        :name="checkboxFilter.name"
+        :items="checkboxFilter.items"/>
 
 </template>
 
@@ -28,7 +31,17 @@ export default {
         ...mapState({
             filters: state => state.filters,
         }),
-    }
+    },
+    methods: {
+        applyRangeFilter(name, [min, max]) {
+            let filters = {}
+            filters[name] = {
+                "min": min,
+                "max": max,
+            }
+            this.$store.dispatch('search', {"range": filters})
+        }
+    },
 }
 </script>
 

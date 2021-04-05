@@ -23,9 +23,6 @@
 
 <script>
 import {onMounted, ref} from "@vue/runtime-core";
-import axios from "axios";
-import store from "@/store";
-import {ElLoading} from "element-plus";
 
 export default {
     name: "SearchInput",
@@ -35,20 +32,21 @@ export default {
         }
     },
     mounted() {
-        this.search()
+        this.$router.isReady()
+            .then(() => {
+                this.query = this.$route.query.query
+                this.$store.dispatch('search')
+            })
     },
     methods: {
         search() {
-            let loading = ElLoading.service({fullscreen: true})
-            axios.post("http://localhost:8081/search/cars", JSON.stringify({query: this.query}))
-                .then(response => {
-                    setTimeout(() => {
-                        console.log(response.data)
-                        store.commit("updateCars", response.data["cars"])
-                        store.commit("updateFilters", response.data["filters"])
-                        this.$nextTick(() => loading.close());
-                    }, 200)
-                })
+            this.$router.replace({
+                ...this.$router.currentRoute,
+                query: {
+                    query: this.query || undefined,
+                }
+            })
+                .then(() => this.$store.dispatch('search'))
         }
     },
     setup() {
@@ -95,7 +93,6 @@ export default {
             handleSelect,
         };
     }
-    ,
 }
 </script>
 

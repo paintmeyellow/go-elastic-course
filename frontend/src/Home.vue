@@ -27,7 +27,7 @@ import FiltersActive from "@/components/FiltersActive";
 import CarsList from "@/components/CarsList";
 
 export default {
-    name: 'App',
+    name: 'Home',
     components: {
         "search-input": SearchInput,
         "filters-list": FiltersList,

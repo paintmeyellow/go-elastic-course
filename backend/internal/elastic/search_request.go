@@ -17,8 +17,9 @@ type SearchRequest struct {
 
 func (req SearchRequest) Do(ctx context.Context, es *elasticsearch.Client) (*SearchResponse, error) {
 	body := map[string]interface{}{
-		"query": req.query(),
-		"aggs":  req.aggs(),
+		"query":       req.query(),
+		"aggs":        req.aggs(),
+		"post_filter": req.postFilter(),
 	}
 
 	b, _ := json.Marshal(body)
@@ -100,10 +101,10 @@ var nameToField = map[string]string{
 	"Year":  "params.year",
 }
 
-func (ff ActiveFilters) buildFor(skipField string) []map[string]interface{} {
+func (ff ActiveFilters) buildFor(_field string) []map[string]interface{} {
 	var filters []map[string]interface{}
 	for name, values := range ff.Checkbox {
-		if field, ok := nameToField[name]; ok && field != skipField {
+		if field, ok := nameToField[name]; ok && field != _field {
 			filters = append(filters, map[string]interface{}{
 				"terms": map[string]interface{}{
 					field: values,
@@ -112,7 +113,7 @@ func (ff ActiveFilters) buildFor(skipField string) []map[string]interface{} {
 		}
 	}
 	for name, values := range ff.Range {
-		if field, ok := nameToField[name]; ok && field != skipField {
+		if field, ok := nameToField[name]; ok && field != _field {
 			filters = append(filters, map[string]interface{}{
 				"range": map[string]interface{}{
 					field: map[string]float64{
@@ -183,6 +184,14 @@ func (req SearchRequest) aggs() map[string]interface{} {
 					},
 				},
 			},
+		},
+	}
+}
+
+func (req SearchRequest) postFilter() map[string]interface{} {
+	return map[string]interface{}{
+		"bool": map[string]interface{}{
+			"filter": req.ActiveFilters.buildFor("*"),
 		},
 	}
 }

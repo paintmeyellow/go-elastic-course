@@ -13,45 +13,62 @@
         >
         </el-slider>
         <div class="ranges">
-            <el-input-number @change="changeMinValue"
-                             :model-value="values[0]"
-                             size="mini"
-                             :min="min"
-                             controls-position="right"
+            <el-input-number
+                v-model="minValue"
+                size="mini"
+                :min="min"
+                controls-position="right"
             />
-            <el-input-number @change="changeMaxValue"
-                             :model-value="values[1]"
-                             size="mini"
-                             :max="max"
-                             controls-position="right"
+            <el-input-number
+                v-model="maxValue"
+                size="mini"
+                :max="max"
+                controls-position="right"
             />
         </div>
     </el-card>
 </template>
 
 <script>
+import _ from 'lodash'
+
 export default {
     name: "RangeFilter",
     props: {
-        name: String,
-        min: Number,
-        max: Number,
+        name: {
+            type: String,
+            required: true
+        },
+        min: {
+            type: Number,
+            required: true
+        },
+        max: {
+            type: Number,
+            required: true
+        },
     },
     data() {
         return {
-            values: [this.min, this.max]
+            minValue: this.min,
+            maxValue: this.max,
         }
     },
-    methods: {
-        changeValues(vv) {
-            this.values = vv
-        },
-        changeMinValue(v) {
-            this.values = [v, this.values[1]]
-        },
-        changeMaxValue(v) {
-            this.values = [this.values[0], v]
+    computed: {
+        values: {
+            set([min, max]) {
+                this.minValue = min
+                this.maxValue = max
+            },
+            get() {
+                return [this.minValue, this.maxValue]
+            }
         }
+    },
+    watch: {
+        values: _.debounce(function () {
+            this.$emit('onChange', this.values)
+        }, 1000)
     }
 }
 </script>
