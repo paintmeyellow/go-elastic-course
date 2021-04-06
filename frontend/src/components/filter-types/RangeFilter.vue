@@ -7,6 +7,7 @@
         </template>
         <el-slider
             v-model="values"
+            @change="onChange"
             :min="min"
             :max="max"
             range
@@ -14,13 +15,15 @@
         </el-slider>
         <div class="ranges">
             <el-input-number
-                v-model="minValue"
+                v-model="values[0]"
+                @change="onChange"
                 size="mini"
                 :min="min"
                 controls-position="right"
             />
             <el-input-number
-                v-model="maxValue"
+                v-model="values[1]"
+                @change="onChange"
                 size="mini"
                 :max="max"
                 controls-position="right"
@@ -50,25 +53,37 @@ export default {
     },
     data() {
         return {
-            minValue: this.min,
-            maxValue: this.max,
+            values: [this.min, this.max]
         }
     },
-    computed: {
-        values: {
-            set([min, max]) {
-                this.minValue = min
-                this.maxValue = max
-            },
-            get() {
-                return [this.minValue, this.maxValue]
+    created() {
+        let re = /(\w+)\[(-?\d+)-(-?\d+)]/
+        let res = re.exec(this.$route.query.range || "")
+        if (res !== null) {
+            let [min, max] = res.splice(2)
+
+            min = parseInt(min)
+            max = parseInt(max)
+
+            this.values = [min, max]
+        }
+    },
+    methods: {
+        onChange: _.debounce(function () {
+            let query = {...this.$route.query}
+
+            if (this.values[0] === this.min && this.values[1] === this.max) {
+                delete query.range
+            } else {
+                query.range = `${this.name}[${this.values[0]}-${this.values[1]}]`
             }
-        }
-    },
-    watch: {
-        values: _.debounce(function () {
-            this.$emit('onChange', this.values)
-        }, 1000)
+
+            this.$router.push({
+                ...this.$router.currentRoute,
+                query: query,
+            })
+                .then(() => this.$store.dispatch('search'))
+        }, 500)
     }
 }
 </script>

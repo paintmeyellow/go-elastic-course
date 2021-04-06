@@ -40,11 +40,16 @@ export default {
     },
     methods: {
         search() {
-            this.$router.replace({
-                ...this.$router.currentRoute,
-                query: {
-                    query: this.query || undefined,
-                }
+            let query = {...this.$route.query}
+
+            if (this.query === "") {
+                delete query.query
+            } else {
+                query.query =  this.query
+            }
+
+            this.$router.push({
+                query: query
             })
                 .then(() => this.$store.dispatch('search'))
         }

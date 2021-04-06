@@ -1,7 +1,6 @@
 <template>
 
     <range-filter
-        @onChange="applyRangeFilter(filter.name, $event)"
         :key="filter"
         v-for="filter in filters.range"
         :name="filter.name"
@@ -31,16 +30,6 @@ export default {
         ...mapState({
             filters: state => state.filters,
         }),
-    },
-    methods: {
-        applyRangeFilter(name, [min, max]) {
-            let filters = {}
-            filters[name] = {
-                "min": min,
-                "max": max,
-            }
-            this.$store.dispatch('search', {"range": filters})
-        }
     },
 }
 </script>

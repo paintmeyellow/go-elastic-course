@@ -13,7 +13,7 @@
                     @change="onChange"
                     :label="item.value">
                     {{ item.value }}
-                    <span class="badge">{{item.count}}</span>
+                    <span class="badge">{{ item.count }}</span>
                 </el-checkbox>
             </el-space>
         </el-checkbox-group>
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import _ from "lodash";
+
 export default {
     name: "CheckboxFilter",
     props: {
@@ -32,10 +34,34 @@ export default {
             checkList: [],
         }
     },
+    created() {
+        let query = {...this.$route.query}
+        let currentFilters = JSON.parse(query.checkbox || "{}")
+        this.checkList = currentFilters[this.name] || []
+    },
     methods: {
-        onChange(){
-            console.log(this.checkList)
-        }
+        onChange: _.debounce(function () {
+            let query = {...this.$route.query}
+            let checkbox = JSON.parse(query.checkbox || "{}")
+
+            if (this.checkList.length === 0) {
+                delete checkbox[this.name]
+                if (Object.keys(checkbox).length > 0) {
+                    query.checkbox = JSON.stringify(checkbox)
+                } else {
+                    delete query.checkbox
+                }
+            } else {
+                checkbox[this.name] = this.checkList
+                query.checkbox = JSON.stringify(checkbox)
+            }
+
+            this.$router.push({
+                ...this.$router.currentRoute,
+                query: query,
+            })
+                .then(() => this.$store.dispatch('search'))
+        }, 500)
     }
 }
 </script>
