@@ -57,25 +57,25 @@ export default {
         }
     },
     created() {
-        let re = /(\w+)\[(-?\d+)-(-?\d+)]/
-        let res = re.exec(this.$route.query.range || "")
-        if (res !== null) {
-            let [min, max] = res.splice(2)
-
-            min = parseInt(min)
-            max = parseInt(max)
-
-            this.values = [min, max]
+        let query = {...this.$route.query}
+        let range = JSON.parse(query.range || "{}")
+        if (range[this.name]) {
+            this.values = [
+                range[this.name].min || this.min,
+                range[this.name].max || this.max
+            ]
         }
     },
     methods: {
         onChange: _.debounce(function () {
             let query = {...this.$route.query}
+            let range = JSON.parse(query.range || "{}")
 
             if (this.values[0] === this.min && this.values[1] === this.max) {
                 delete query.range
             } else {
-                query.range = `${this.name}[${this.values[0]}-${this.values[1]}]`
+                range[this.name] = {min: this.values[0], max: this.values[1]}
+                query.range = JSON.stringify(range)
             }
 
             this.$router.push({

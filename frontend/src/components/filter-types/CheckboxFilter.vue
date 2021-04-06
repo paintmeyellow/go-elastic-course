@@ -36,8 +36,8 @@ export default {
     },
     created() {
         let query = {...this.$route.query}
-        let currentFilters = JSON.parse(query.checkbox || "{}")
-        this.checkList = currentFilters[this.name] || []
+        let checkbox = JSON.parse(query.checkbox || "{}")
+        this.checkList = checkbox[this.name] || []
     },
     methods: {
         onChange: _.debounce(function () {
