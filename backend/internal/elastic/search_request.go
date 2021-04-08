@@ -167,6 +167,7 @@ func (req SearchRequest) aggs() map[string]interface{} {
 				"vars": map[string]interface{}{
 					"terms": map[string]interface{}{
 						"field": "params.color",
+						"size":  100,
 					},
 				},
 			},
@@ -181,6 +182,7 @@ func (req SearchRequest) aggs() map[string]interface{} {
 				"vars": map[string]interface{}{
 					"terms": map[string]interface{}{
 						"field": "params.year",
+						"size":  100,
 					},
 				},
 			},

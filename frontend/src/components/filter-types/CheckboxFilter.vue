@@ -36,8 +36,25 @@ export default {
     },
     created() {
         let query = {...this.$route.query}
-        let checkbox = JSON.parse(query.checkbox || "{}")
-        this.checkList = checkbox[this.name] || []
+        let queryValues = JSON.parse(query.checkbox || "{}")[this.name] || []
+
+        let responseCheckbox = this.$store.getters.checkboxByName(this.name)
+        let responseItems = []
+        if (responseCheckbox) {
+            responseItems = responseCheckbox.items
+        }
+
+        let checkList = []
+
+        queryValues.forEach((queryValue) => {
+            responseItems.forEach((respItem) => {
+                if (queryValue === respItem.value) {
+                    checkList.push(queryValue)
+                }
+            })
+        })
+
+        this.checkList = checkList
     },
     methods: {
         onChange: _.debounce(function () {
@@ -56,11 +73,9 @@ export default {
                 query.checkbox = JSON.stringify(checkbox)
             }
 
-            this.$router.push({
-                ...this.$router.currentRoute,
-                query: query,
-            })
+            this.$router.push({query: query})
                 .then(() => this.$store.dispatch('search'))
+
         }, 500)
     }
 }

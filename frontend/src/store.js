@@ -14,6 +14,11 @@ const store = createStore({
             searched: false,
         }
     },
+    getters: {
+        checkboxByName: (state) => (name) => {
+            return state.filters.checkbox.find(item => item.name === name)
+        }
+    },
     mutations: {
         updateCars(state, cars) {
             state.cars = cars
@@ -21,19 +26,26 @@ const store = createStore({
         },
         updateFilters(state, filters) {
             state.filters = filters
-        },
-        updateActiveFilters(state, filters) {
-            state.activeFilters = filters
         }
     },
     actions: {
         search({commit}) {
             let queryParams = router.currentRoute.value.query
 
+            let activeFilters = {}
+
+            if (queryParams.checkbox) {
+                activeFilters.checkbox = JSON.parse(queryParams.checkbox || "{}")
+            }
+
+            if (queryParams.range) {
+                activeFilters.range = JSON.parse(queryParams.range || "{}")
+            }
+
             let loading = ElLoading.service({fullscreen: true})
             axios.post("http://localhost:8081/search/cars", JSON.stringify({
                 query: queryParams.query,
-                active_filters: queryParams.activeFilters
+                active_filters: activeFilters
             }))
                 .then(response => {
                     setTimeout(() => {
