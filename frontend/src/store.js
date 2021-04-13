@@ -26,6 +26,36 @@ const store = createStore({
         },
         updateFilters(state, filters) {
             state.filters = filters
+
+            let checkboxResponse = filters.checkbox || {}
+
+            let query = {...router.currentRoute.value.query}
+            let checkboxQuery = JSON.parse(query.checkbox || "{}")
+
+            let newCheckboxQuery = {}
+
+            Object.keys(checkboxQuery).forEach(name => {
+                Object.keys(checkboxResponse).forEach(i => {
+                    if (name === checkboxResponse[i].name) {
+                        newCheckboxQuery[name] = []
+                        let values = checkboxQuery[name]
+                        values.forEach(value => {
+                            checkboxResponse[i].items.forEach(item => {
+                                if (value === item.value) {
+                                    newCheckboxQuery[name].push(value)
+                                }
+                            })
+                        })
+                    }
+                })
+            })
+
+            if (Object.keys(newCheckboxQuery).length > 0) {
+                query.checkbox = JSON.stringify(newCheckboxQuery)
+            } else {
+                delete query.checkbox
+            }
+            router.replace({query: query})
         }
     },
     actions: {

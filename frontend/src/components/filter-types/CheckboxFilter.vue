@@ -1,5 +1,5 @@
 <template>
-    <el-card class="box-card" shadow="false">
+    <el-card class="box-card" shadow="false" body-style="overflow-y: auto; max-height: 300px;">
         <template #header>
             <div class="card-header">
                 <span>{{ name }}</span>
@@ -35,26 +35,9 @@ export default {
         }
     },
     created() {
-        let query = {...this.$route.query}
-        let queryValues = JSON.parse(query.checkbox || "{}")[this.name] || []
-
-        let responseCheckbox = this.$store.getters.checkboxByName(this.name)
-        let responseItems = []
-        if (responseCheckbox) {
-            responseItems = responseCheckbox.items
-        }
-
-        let checkList = []
-
-        queryValues.forEach((queryValue) => {
-            responseItems.forEach((respItem) => {
-                if (queryValue === respItem.value) {
-                    checkList.push(queryValue)
-                }
-            })
-        })
-
-        this.checkList = checkList
+      let query = {...this.$route.query}
+      let checkbox = JSON.parse(query.checkbox || "{}")
+      this.checkList = checkbox[this.name] || []
     },
     methods: {
         onChange: _.debounce(function () {
